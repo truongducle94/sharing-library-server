@@ -1,36 +1,69 @@
 Users = require('../models/userModel')
 
+async function onCheckingEmail(email) {
+    let check
+    await Users.findOne({ email: email }, function (err, user) {
+        if (err) {
+            console.log('SERVER ERROR')
+        }
+        if (Boolean(user)) {
+            check = false
+        } else {
+            check = true
+        }
+    })
+    return check
+}
+
 exports.getAll = (req, res) => {
     Users.get((err, users) => {
         if (err) {
             res.json({
-                status: "error",
+                ok: 0,
                 message: err,
             });
         }
         res.json({
-            status: "success",
+            ok: 1,
             message: "User retrieved successfully",
             data: users
         });
     })
 }
 
-exports.create = (req, res) => {
-    let user = new Users()
-    // user.name.first = req.body.name.first ? req.body.name.first : user.name.first;
-    // user.name.last = req.body.name.last ? req.body.name.last : user.name.last;
-    user.name = req.body.name ? req.body.name : user.name;
-    user.email = req.body.email;
-    user.password = req.body.password;
-    user.phone = req.body.phone;
-    user.gender = req.body.gender
-    user.rank = req.body.rank
-    user.point = req.body.point
-    user.save((err, res)=> {
-        res.json({
-            message: 'New user created!',
-            data: user
-        });
+exports.create = async (req, res) => {
+    let name = req.body.name ? req.body.name : user.name;
+    let email = req.body.email;
+    let password = req.body.password;
+    let phone = req.body.phone;
+    let gender = req.body.gender
+    let rank = req.body.rank
+    let point = req.body.point
+    const checkEmail = await onCheckingEmail(email)
+    if (checkEmail) {
+        console.log(checkEmail)
+        let user = new Users({
+            name: name,
+            email: email,
+            password: password,
+            phone: phone,
+            gender: gender,
+            rank: rank,
+            point: point
+        })
+        user.save((err) => {
+            if (err) res.json({
+                ok: 0,
+                message: err
+            })
+            res.json({
+                ok: 1,
+                message: 'New user created!',
+                data: user
+            });
+        })
+    } else res.json({
+        ok: '0',
+        message: 'Email đã tồn tại'
     })
 }

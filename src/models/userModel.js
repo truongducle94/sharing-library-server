@@ -7,7 +7,8 @@ var userSchema = mongoose.Schema({
     },
     email: {
         type: String,
-        required: true
+        unique: true,
+        required: true,
     },
     password: {
         type: String,
@@ -21,11 +22,6 @@ var userSchema = mongoose.Schema({
     rank: String,
     point: String,
     contributed_books: Object,
-    token: {
-        type: String,
-        required: true,
-        default: ''
-    },
 }, {
         timestamps: {
             createdAt: 'created_at',

@@ -26,13 +26,12 @@ var db = mongoose.connection;
 // Setup server port
 var port = process.env.PORT || 3000;
 
+
+app.use('/api', apiRoutes)
+
 app.use('/', function (req, res) {
     res.render('home')
 })
-app.use('/api', apiRoutes)
-
-app.use('/birds', birds)
-
 
 // Launch app to listen to specified port
 app.listen(port, function () {

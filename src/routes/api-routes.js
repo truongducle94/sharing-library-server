@@ -17,6 +17,6 @@ router.route('/users')
 router.route('/books')
     .get(bookController.getAll)
     .post(bookController.create)
-    
+router.get('/login', userController.login)
 // Export API routes
 module.exports = router

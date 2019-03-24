@@ -3,7 +3,6 @@ let bodyParser = require('body-parser');
 let mongoose = require('mongoose');
 let path = require('path')
 let apiRoutes = require('./routes/api-routes')
-let birds = require('./routes/test-routes')
 
 const app = express();
 

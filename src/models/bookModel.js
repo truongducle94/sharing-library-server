@@ -13,10 +13,11 @@ var allBookSchema = mongoose.Schema({
         type: String,
         required: true,
     },
-    status: {
+    image: {
         type: String,
-        required: true,
+        default: ''
     },
+    status: String,
     review: Object,
     quantity: String,
 }, 

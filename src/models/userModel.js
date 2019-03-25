@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+const projectConst = require('../library/utils/constants')
 
 var userSchema = mongoose.Schema({
     name: {
@@ -8,6 +9,7 @@ var userSchema = mongoose.Schema({
     email: {
         type: String,
         unique: true,
+        lowercase: true,
         required: true,
     },
     hash_password: {
@@ -18,10 +20,20 @@ var userSchema = mongoose.Schema({
         type: String,
         required: true,
     },
-    gender: String,
-    rank: String,
-    point: String,
+    gender: {
+        type: String,
+        required: true
+    },
+    rank: {
+        type: String,
+        default: projectConst.userRanking.bronze
+    },
+    point: {
+        type: String,
+        default: '0'
+    },
     contributed_books: Object,
+    admin: Boolean
 }, {
         timestamps: {
             createdAt: 'created_at',

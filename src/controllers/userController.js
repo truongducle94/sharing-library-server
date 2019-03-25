@@ -1,6 +1,10 @@
 Users = require('../models/userModel')
 const bcrypt = require('bcrypt')
 var projectConst = require('../library/utils/constants')
+var authMiddleware = require('../middlewares/auth-middleware')
+var jwt = require('jsonwebtoken');
+const jwtConfig = require('../config/jwtConfig')
+
 
 async function onCheckingEmail(email) {
     let check
@@ -85,6 +89,9 @@ exports.getProfile = (req, res) => {
 exports.login = (req, res) => {
     let email = req.body.email
     let password = req.body.password
+    let payload = {
+        email: req.body.email
+    }
     Users.findOne({ email: email }, (err, user) => {
         if (err) {
             res.json({
@@ -103,13 +110,16 @@ exports.login = (req, res) => {
                     return
                 }
                 if (checkPass) {
-                    res.json({
-                        ok: projectConst.requestResult.success,
-                        message: 'Đăng nhập thành công',
-                        data: {
-                            token: '',
-                            info: user
-                        }
+                    jwt.sign(payload, jwtConfig.jwtSecret, { expiresIn: jwtConfig.expiresIn }, (err, token) => {
+                        if (err) console.log(err)
+                        res.json({
+                            ok: projectConst.requestResult.success,
+                            message: 'Đăng nhập thành công',
+                            data: {
+                                token: token,
+                                info: user
+                            }
+                        })
                     })
                 } else {
                     res.json({

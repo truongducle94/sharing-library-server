@@ -1,10 +1,13 @@
 let express = require('express');
+let cors = require('cors')
 let bodyParser = require('body-parser');
 let mongoose = require('mongoose');
 let path = require('path')
 let apiRoutes = require('./routes/api-routes')
 
 const app = express();
+
+app.use(cors())
 
 // Configure bodyparser to handle post requests
 app.use(bodyParser.urlencoded({

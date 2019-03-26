@@ -33,7 +33,10 @@ var userSchema = mongoose.Schema({
         default: '0'
     },
     contributed_books: Object,
-    admin: Boolean
+    admin: {
+        type: Boolean,
+        default: false
+    }
 }, {
         timestamps: {
             createdAt: 'created_at',

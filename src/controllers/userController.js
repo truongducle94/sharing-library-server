@@ -21,25 +21,29 @@ async function onCheckingEmail(email) {
     return check
 }
 
-function convertUserData(dataArray) {
-
-}
-
 //Lấy thông tin tất cả người dùng
 exports.getAll = (req, res) => {
-    Users.get((err, users) => {
-        if (err) {
+    if (req.decode.admin) {
+        Users.get((err, users) => {
+            if (err) {
+                res.json({
+                    ok: projectConst.requestResult.failure,
+                    message: err,
+                });
+            }
             res.json({
-                ok: projectConst.requestResult.failure,
-                message: err,
+                ok: projectConst.requestResult.success,
+                message: "User retrieved successfully",
+                data: users,
             });
-        }
-        res.json({
-            ok: projectConst.requestResult.success,
-            message: "User retrieved successfully",
-            data: users,
-        });
-    })
+        })
+    } else {
+        res.status(401).json({
+            ok: projectConst.requestResult.failure,
+            message: 'UNAUTHORIZED',
+        })
+    }
+
 }
 
 //Đăng ký
@@ -82,16 +86,34 @@ exports.create = async (req, res) => {
 
 //lấy thông tin cá nhân
 exports.getProfile = (req, res) => {
-
+    let email = req.decode.email
+    Users.findOne({ email: email }, (err, user) => {
+        if (err) {
+            res.json({
+                ok: projectConst.requestResult.failure,
+                message: 'Internal Server'
+            })
+            return
+        }
+        if (Boolean(user)) {
+            res.status(200).json({
+                ok: projectConst.requestResult.success,
+                message: 'Lấy thông tin thành công',
+                data: user
+            })
+        } else {
+            res.status(401).json({
+                ok: projectConst.requestResult.failure,
+                message: 'Unauthorized user!'
+            })
+        }
+    })
 }
 
 //đăng nhập
 exports.login = (req, res) => {
     let email = req.body.email
     let password = req.body.password
-    let payload = {
-        email: req.body.email
-    }
     Users.findOne({ email: email }, (err, user) => {
         if (err) {
             res.json({
@@ -110,6 +132,10 @@ exports.login = (req, res) => {
                     return
                 }
                 if (checkPass) {
+                    let payload = {
+                        email: user.email,
+                        admin: user.admin,
+                    }
                     jwt.sign(payload, jwtConfig.jwtSecret, { expiresIn: jwtConfig.expiresIn }, (err, token) => {
                         if (err) console.log(err)
                         res.json({
@@ -128,7 +154,6 @@ exports.login = (req, res) => {
                     })
                 }
             })
-
         } else res.json({
             ok: projectConst.requestResult.failure,
             message: 'Email đăng nhập không tồn tại'

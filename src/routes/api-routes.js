@@ -10,13 +10,15 @@ router.get('/', function (req, res) {
 
 var userController = require('../controllers/userController')
 var bookController = require('../controllers/bookControllers')
+var authMiddleware = require('../middlewares/auth-middleware')
 
 router.route('/users')
-    .get(userController.getAll)
+    .get(authMiddleware.verifyJwt, userController.getAll)
     .post(userController.create);
 router.route('/books')
     .get(bookController.getAll)
     .post(bookController.create)
+router.get('/profile', authMiddleware.verifyJwt, userController.getProfile)
 router.post('/login', userController.login)
 // Export API routes
 module.exports = router

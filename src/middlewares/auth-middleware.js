@@ -1,8 +1,28 @@
-var jwt = require('jsonwebtoken');
+Users = require('../models/userModel')
 const jwtConfig = require('../config/jwtConfig')
+var projectConst = require('../library/utils/constants')
+var jwt = require('jsonwebtoken');
+var bcrypt = require('bcrypt');
 
-exports.createJwt = async ({payload}) => {
-    var token = await jwt.sign(payload, jwtConfig.jwtSecret, {expiresIn: jwtConfig.expiresIn})
-    console.log(token, 'AAAAAAAAAAAA')
-    return token
-}
+exports.verifyJwt = function (req, res, next) {
+    if (req.headers.authorization) {
+        let jwtToken = req.headers.authorization;
+        jwt.verify(jwtToken, jwtConfig.jwtSecret, function (err, payload) {
+            if (err) {
+                res.status(401).json({
+                    ok: projectConst.requestResult.failure,
+                    message: 'Unauthorized user!'
+                });
+            } else {
+                // find
+                req.decode = payload;
+                next();
+            }
+        });
+    } else {
+        res.status(401).json({
+            ok: projectConst.requestResult.failure,
+            message: 'Unauthorized user!'
+        });
+    }
+};

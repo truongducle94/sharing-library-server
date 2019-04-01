@@ -3,7 +3,7 @@ let cors = require('cors')
 let bodyParser = require('body-parser');
 let mongoose = require('mongoose');
 let path = require('path')
-let apiRoutes = require('./routes/api-routes')
+let apiRoutes = require('./src/routes/api-routes')
 
 const app = express();
 

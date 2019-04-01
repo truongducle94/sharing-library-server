@@ -23,11 +23,11 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 // Connect to Mongoose and set connection variable
 mongoose.set('useCreateIndex', true)
-mongoose.connect('mongodb://truongld:1Atruong%21%40@sharinglibrary-fs34l.gcp.mongodb.net/sharing_library', {useNewUrlParser: true});
+mongoose.connect('mongodb://truongld:1Atruong!@@sharinglibrary-fs34l.gcp.mongodb.net/sharing_library', {useNewUrlParser: true});
 var db = mongoose.connection;
 
 // Setup server port
-var port = process.env.PORT || 3000;
+var port = process.env.PORT || 5000;
 
 
 app.use('/api', apiRoutes)

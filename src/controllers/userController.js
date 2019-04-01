@@ -1,5 +1,5 @@
 Users = require('../models/userModel')
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcrypt-nodejs')
 var projectConst = require('../library/utils/constants')
 var authMiddleware = require('../middlewares/auth-middleware')
 var jwt = require('jsonwebtoken');
@@ -55,7 +55,7 @@ exports.create = async (req, res) => {
     let gender = req.body.gender
     const checkEmail = await onCheckingEmail(email)
     if (checkEmail) {
-        bcrypt.hash(password, projectConst.saltRound, (err, hash_password) => {
+        bcrypt.hash(password, null, null, (err, hash_password) => {
             if (err) console.log(err, 'Lỗi')
             else {
                 let user = new Users({

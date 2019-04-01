@@ -22,7 +22,8 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')))
 
 // Connect to Mongoose and set connection variable
-mongoose.connect('mongodb://localhost:27017/sharing_library');
+mongoose.set('useCreateIndex', true)
+mongoose.connect('mongodb://truongld:1Atruong%21%40@sharinglibrary-fs34l.gcp.mongodb.net/sharing_library', {useNewUrlParser: true});
 var db = mongoose.connection;
 
 // Setup server port

@@ -2,7 +2,6 @@ Users = require('../models/userModel')
 const jwtConfig = require('../config/jwtConfig')
 var projectConst = require('../library/utils/constants')
 var jwt = require('jsonwebtoken');
-var bcrypt = require('bcrypt');
 
 exports.verifyJwt = function (req, res, next) {
     if (req.headers.authorization) {

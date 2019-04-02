@@ -22,7 +22,7 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')))
 
 // Connect to Mongoose and set connection variable
-const uri = "mongodb+srv://truongld:1Atruong%21%40@sharinglibrary-fs34l.gcp.mongodb.net/test?retryWrites=true"
+const uri = "mongodb+srv://truongld:1Atruong%21%40@sharinglibrary-fs34l.gcp.mongodb.net/sharing-library?retryWrites=true"
 
 mongoose.set('useCreateIndex', true)
 mongoose.connect(uri, {useNewUrlParser: true});

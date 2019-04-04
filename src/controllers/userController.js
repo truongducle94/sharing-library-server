@@ -11,8 +11,10 @@ async function onCheckingEmail(email) {
     await Users.findOne({ email: email }, function (err, user) {
         if (err) {
             console.log('SERVER ERROR')
+            return false
         }
         if (Boolean(user)) {
+            console.log(user, 'ACCCACS')
             check = false
         } else {
             check = true
@@ -26,15 +28,16 @@ exports.getAll = (req, res) => {
     if (req.decode.admin) {
         Users.get((err, users) => {
             if (err) {
-                res.json({
+                res.status(500).json({
                     ok: projectConst.requestResult.failure,
                     message: err,
                 });
+                return
             }
-            res.json({
+            res.status(200).json({
                 ok: projectConst.requestResult.success,
                 message: "User retrieved successfully",
-                data: users,
+                data: users
             });
         })
     } else {
@@ -48,29 +51,24 @@ exports.getAll = (req, res) => {
 
 //Đăng ký
 exports.create = async (req, res) => {
-    let name = req.body.name ? req.body.name : user.name;
-    let email = req.body.email;
-    let password = req.body.password;
-    let phone = req.body.phone;
-    let gender = req.body.gender
-    const checkEmail = await onCheckingEmail(email)
+    let data = req.body
+    let password = req.body.password
+    const checkEmail = await onCheckingEmail(req.body.email)
     if (checkEmail) {
         bcrypt.hash(password, null, null, (err, hash_password) => {
             if (err) console.log(err, 'Lỗi')
             else {
-                let user = new Users({
-                    name: name,
-                    email: email,
-                    hash_password: hash_password,
-                    phone: phone,
-                    gender: gender,
-                })
+                data.hash_password = hash_password
+                let user = new Users(data)
                 user.save((err) => {
-                    if (err) res.json({
-                        ok: projectConst.requestResult.failure,
-                        message: err
-                    })
-                    res.json({
+                    if (err) {
+                        res.json({
+                            ok: projectConst.requestResult.failure,
+                            message: err
+                        })
+                        return
+                    }
+                    res.status(201).json({
                         ok: projectConst.requestResult.success,
                         message: 'New user created!',
                         data: user
@@ -89,7 +87,7 @@ exports.getProfile = (req, res) => {
     let email = req.decode.email
     Users.findOne({ email: email }, (err, user) => {
         if (err) {
-            res.json({
+            res.status(500).json({
                 ok: projectConst.requestResult.failure,
                 message: 'Internal Server'
             })
@@ -116,7 +114,7 @@ exports.login = (req, res) => {
     let password = req.body.password
     Users.findOne({ email: email }, (err, user) => {
         if (err) {
-            res.json({
+            res.status(500).json({
                 ok: projectConst.requestResult.failure,
                 message: 'Internal Server'
             })
@@ -125,7 +123,7 @@ exports.login = (req, res) => {
         if (Boolean(user)) {
             bcrypt.compare(password, user.hash_password, (err, checkPass) => {
                 if (err) {
-                    res.json({
+                    res.status(500).json({
                         ok: projectConst.requestResult.failure,
                         message: 'Internal Server'
                     })
@@ -137,8 +135,11 @@ exports.login = (req, res) => {
                         admin: user.admin,
                     }
                     jwt.sign(payload, jwtConfig.jwtSecret, { expiresIn: jwtConfig.expiresIn }, (err, token) => {
-                        if (err) console.log(err)
-                        res.json({
+                        if (err) {
+                            console.log(err)
+                            return
+                        }
+                        res.status(200).json({
                             ok: projectConst.requestResult.success,
                             message: 'Đăng nhập thành công',
                             data: {

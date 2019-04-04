@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var constants = require('../library/utils/constants')
 
 var allBookSchema = mongoose.Schema({
     name: {
@@ -17,9 +18,16 @@ var allBookSchema = mongoose.Schema({
         type: String,
         default: ''
     },
-    status: String,
-    review: Object,
-    quantity: String,
+    status: {
+        type: String,
+        default: constants.book_status.pending
+    },
+    review_id: Array,
+    contributor_id: String,
+    borrow_at: Date,
+    deadline_at: Date,
+    times_borrow: Number,
+    average_point: String,
 }, 
 {
     timestamps: {

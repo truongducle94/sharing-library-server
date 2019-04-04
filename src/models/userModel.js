@@ -22,7 +22,7 @@ var userSchema = mongoose.Schema({
     },
     gender: {
         type: String,
-        required: true
+        default: projectConst.gender.no_data,
     },
     rank: {
         type: String,
@@ -33,6 +33,8 @@ var userSchema = mongoose.Schema({
         default: '0'
     },
     contributed_books: Object,
+    borrowing_books: Object,
+    history: Object,
     admin: {
         type: Boolean,
         default: false
@@ -43,6 +45,12 @@ var userSchema = mongoose.Schema({
             updatedAt: 'updated_at'
         }
     });
+
+userSchema.methods.toJSON = function () {
+    var user = this.toObject();
+    user.hash_password = undefined
+    return user;
+}
 
 var Users = module.exports = mongoose.model('users', userSchema)
 

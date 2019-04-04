@@ -4,6 +4,7 @@ let bodyParser = require('body-parser');
 let mongoose = require('mongoose');
 let path = require('path')
 let apiRoutes = require('./src/routes/api-routes')
+let config = require('./src/config/config')
 
 const app = express();
 
@@ -22,7 +23,7 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')))
 
 // Connect to Mongoose and set connection variable
-const uri = "mongodb+srv://truongld:1Atruong%21%40@sharinglibrary-fs34l.gcp.mongodb.net/sharing-library?retryWrites=true"
+const uri = config.mongodb_uri
 
 mongoose.set('useCreateIndex', true)
 mongoose.connect(uri, {useNewUrlParser: true});

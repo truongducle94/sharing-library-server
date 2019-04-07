@@ -12,13 +12,17 @@ var userController = require('../controllers/userController')
 var bookController = require('../controllers/bookControllers')
 var authMiddleware = require('../middlewares/auth-middleware')
 
+// Đăng ký, đăng nhập
+router.post('/register', userController.create)
+router.post('/login', userController.login)
+
 router.route('/users')
     .get(authMiddleware.verifyJwt, userController.getAll)
-    .post(userController.create);
+
+router.get('/profile', authMiddleware.verifyJwt, userController.getProfile)
 router.route('/books')
     .get(bookController.getAll)
     .post(bookController.create)
-router.get('/profile', authMiddleware.verifyJwt, userController.getProfile)
-router.post('/login', userController.login)
+
 // Export API routes
 module.exports = router

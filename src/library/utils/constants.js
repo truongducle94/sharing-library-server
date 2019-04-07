@@ -23,5 +23,5 @@ module.exports = {
         available: '1',
         unavailable: '2',
         pending: '0',
-    }
+    },
 }

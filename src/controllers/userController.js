@@ -36,7 +36,7 @@ exports.getAll = (req, res) => {
             }
             res.status(200).json({
                 ok: projectConst.requestResult.success,
-                message: "User retrieved successfully",
+                message: "Lấy thông tin tất cả người dùng thành công",
                 data: users
             });
         })
@@ -70,7 +70,7 @@ exports.create = async (req, res) => {
                     }
                     res.status(201).json({
                         ok: projectConst.requestResult.success,
-                        message: 'New user created!',
+                        message: 'Tạo mới thành công',
                         data: user
                     });
                 })

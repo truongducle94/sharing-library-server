@@ -15,10 +15,14 @@ var authMiddleware = require('../middlewares/auth-middleware')
 router.post('/register', userController.create)
 router.post('/login', userController.login)
 
+// Liên quan đến người dùng
 router.route('/users')
     .get(authMiddleware.verifyJwt, userController.getAll)
+router.route('/profile')
+    .get(authMiddleware.verifyJwt, userController.getProfile)
+    .put(authMiddleware.verifyJwt, userController.updateProfile)
 
-router.get('/profile', authMiddleware.verifyJwt, userController.getProfile)
+
 router.route('/books')
     .get(bookController.getAll)
     .post(bookController.create)

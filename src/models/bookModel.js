@@ -14,9 +14,13 @@ var allBookSchema = mongoose.Schema({
         type: String,
         required: true,
     },
-    image: {
+    back_image: {
         type: String,
-        default: ''
+        require: true,
+    },
+    front_image: {
+        type: String,
+        require: true,
     },
     status: {
         type: String,

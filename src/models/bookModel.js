@@ -12,7 +12,10 @@ var allBookSchema = mongoose.Schema({
     },
     kind: {
         type: String,
-        required: true,
+        default: constants.kind_of_book.other,
+    },
+    description: {
+        type: String,
     },
     back_image: {
         type: String,
@@ -26,6 +29,7 @@ var allBookSchema = mongoose.Schema({
         type: String,
         default: constants.book_status.pending
     },
+    qr_code: String,
     review_id: Array,
     contributor_id: String,
     borrow_at: Date,

@@ -22,10 +22,9 @@ router.route('/profile')
     .get(authMiddleware.verifyJwt, userController.getProfile)
     .put(authMiddleware.verifyJwt, userController.updateProfile)
 
-
 router.route('/books')
     .get(bookController.getAll)
-    .post(bookController.create)
+    .post(authMiddleware.verifyJwt, bookController.create)
 
 // Export API routes
 module.exports = router

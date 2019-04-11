@@ -2,7 +2,6 @@ Users = require('../models/userModel')
 const bcrypt = require('bcrypt-nodejs')
 var multer = require('multer')
 var projectConst = require('../library/utils/constants')
-var authMiddleware = require('../middlewares/auth-middleware')
 var jwt = require('jsonwebtoken');
 const jwtConfig = require('../config/jwtConfig')
 
@@ -35,62 +34,53 @@ var upload = multer({ storage: storage }).single('user_avatar')
 
 //update profile
 exports.updateProfile = (req, res) => {
-    let email = req.decode.email
-    Users.findOne({ email: email }, (err, user) => {
-        if (err) {
-            res.status(500).json({
-                ok: projectConst.requestResult.failure,
-                message: 'Internal Server'
+    const user = req.decode.user
+    if (!user) {
+        res.status(401).json({
+            ok: projectConst.requestResult.failure,
+            message: 'Người dùng không hợp lệ',
+        })
+        return
+    }
+    upload(req, res, function (error) {
+        if (error) {
+            res.status(400).json({
+                ok: 0,
+                message: 'BAD REQUEST'
             })
             return
         }
-        if (Boolean(user)) {
-            upload(req, res, function (error) {
-                if (error) {
-                    res.status(400).json({
-                        ok: 0,
-                        message: 'BAD REQUEST'
-                    })
-                    return
-                }
-                let validateCount = 0
-                Object.keys(req.body).map(value => {
-                    if (!!req.body[value] && req.body[value] !== user[value]) {
-                        user[value] = req.body[value]
-                        console.log(123)
-                        validateCount++
-                    }
-                })
-                if (!!req.file && req.file.filename != user.avatar) {
-                    user.avatar = req.file.filename
-                    validateCount++
-                }
-
-                if (validateCount == 0) {
-                    res.status(400).json({
-                        ok: projectConst.requestResult.failure,
-                        message: 'Không có thông tin nào cần thay đổi'
-                    })
-                    return
-                }
-                user.save(function (err) {
-                    if (err) {
-                        res.status(500).json({ message: err });
-                        return
-                    }
-                    res.status(200).json({
-                        ok: projectConst.requestResult.success,
-                        message: 'Update thông tin thành công',
-                        data: user
-                    });
-                });
-            })
-        } else {
-            res.status(401).json({
-                ok: projectConst.requestResult.failure,
-                message: 'User not found!!!'
-            })
+        let validateCount = 0
+        Object.keys(req.body).map(value => {
+            if (!!req.body[value] && req.body[value] !== user[value]) {
+                user[value] = req.body[value]
+                console.log(123)
+                validateCount++
+            }
+        })
+        if (!!req.file && req.file.filename != user.avatar) {
+            user.avatar = req.file.filename
+            validateCount++
         }
+
+        if (validateCount == 0) {
+            res.status(400).json({
+                ok: projectConst.requestResult.failure,
+                message: 'Không có thông tin nào cần thay đổi'
+            })
+            return
+        }
+        user.save(function (err) {
+            if (err) {
+                res.status(500).json({ message: err });
+                return
+            }
+            res.status(200).json({
+                ok: projectConst.requestResult.success,
+                message: 'Update thông tin thành công',
+                data: user
+            });
+        });
     })
 }
 
@@ -155,27 +145,17 @@ exports.create = async (req, res) => {
 
 //lấy thông tin cá nhân
 exports.getProfile = (req, res) => {
-    let email = req.decode.email
-    Users.findOne({ email: email }, (err, user) => {
-        if (err) {
-            res.status(500).json({
-                ok: projectConst.requestResult.failure,
-                message: 'Internal Server'
-            })
-            return
-        }
-        if (Boolean(user)) {
-            res.status(200).json({
-                ok: projectConst.requestResult.success,
-                message: 'Lấy thông tin thành công',
-                data: user
-            })
-        } else {
-            res.status(401).json({
-                ok: projectConst.requestResult.failure,
-                message: 'Unauthorized user!'
-            })
-        }
+    if (!req.decode.user) {
+        res.status(401).json({
+            ok: projectConst.requestResult.failure,
+            message: 'Người dùng không hợp lệ',
+        })
+        return
+    }
+    res.status(200).json({
+        ok: projectConst.requestResult.success,
+        message: 'Lấy thông tin thành công',
+        data: req.decode.user
     })
 }
 
@@ -183,6 +163,7 @@ exports.getProfile = (req, res) => {
 exports.login = (req, res) => {
     let email = req.body.email
     let password = req.body.password
+
     Users.findOne({ email: email }, (err, user) => {
         if (err) {
             res.status(500).json({
@@ -215,7 +196,7 @@ exports.login = (req, res) => {
                             message: 'Đăng nhập thành công',
                             data: {
                                 token: token,
-                                info: user
+                                info: user,
                             }
                         })
                     })

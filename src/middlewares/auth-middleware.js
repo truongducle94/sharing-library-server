@@ -13,9 +13,25 @@ exports.verifyJwt = function (req, res, next) {
                     message: 'Unauthorized user!'
                 });
             } else {
-                // find
-                req.decode = payload;
-                next();
+                Users.findOne({ email: payload.email }, (err, user) => {
+                    if (err) {
+                        res.status(500).json({
+                            ok: projectConst.requestResult.failure,
+                            message: 'Internal Server'
+                        })
+                        return
+                    }
+                    if (!user) {
+                        res.status(401).json({
+                            ok: projectConst.requestResult.failure,
+                            message: 'Unauthorized user!'
+                        })
+                        return
+                    }
+                    Object.assign(payload, { user: user })
+                    req.decode = payload;
+                    next();
+                })
             }
         });
     } else {
@@ -24,4 +40,4 @@ exports.verifyJwt = function (req, res, next) {
             message: 'Unauthorized user!'
         });
     }
-};
+}

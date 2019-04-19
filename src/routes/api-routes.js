@@ -9,6 +9,7 @@ router.get('/', function (req, res) {
 
 var userController = require('../controllers/userController')
 var bookController = require('../controllers/bookControllers')
+var requestController = require('../controllers/requestControllers')
 var authMiddleware = require('../middlewares/auth-middleware')
 
 // Đăng ký, đăng nhập
@@ -26,5 +27,7 @@ router.route('/books')
     .get(bookController.getAll)
     .post(authMiddleware.verifyJwt, bookController.create)
 
+router.route('/request')
+    .post(authMiddleware.verifyJwt, requestController.create)
 // Export API routes
 module.exports = router

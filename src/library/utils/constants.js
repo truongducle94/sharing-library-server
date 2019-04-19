@@ -34,4 +34,8 @@ module.exports = {
         romance: '6',
         other: '',
     },
+    request_type: {
+        borrow: 1,
+        contribute: 2,
+    }
 }

@@ -3,7 +3,7 @@ var constant = require('../library/utils/constants')
 
 var requestSchema = mongoose.Schema({
     request_type: {
-        type: String,
+        type: Number,
         required: true,
     },
     data: {
@@ -15,7 +15,7 @@ var requestSchema = mongoose.Schema({
         required: true,
     },
     status: {
-        type: String,
+        type: Number,
         default: constant.request_status.pending
     }
 }, 

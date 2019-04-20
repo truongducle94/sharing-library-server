@@ -26,7 +26,7 @@ var allBookSchema = mongoose.Schema({
         require: true,
     },
     status: {
-        type: String,
+        type: Number,
         default: constants.book_status.pending
     },
     qr_code: String,

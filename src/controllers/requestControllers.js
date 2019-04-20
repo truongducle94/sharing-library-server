@@ -5,13 +5,7 @@ var QRCode = require('qrcode')
 
 exports.create = (req, res) => {
     const user = req.decode.user
-    if (!user) {
-        res.status(401).json({
-            ok: projectConst.requestResult.failure,
-            message: 'Người dùng không hợp lệ',
-        })
-        return
-    }
+
     if (req.body.request_type === constants.request_type.borrow) {
         const book_id = req.body.data.book_id
         AllBooks.findOne({ _id: book_id }, function (err, book) {
@@ -65,4 +59,41 @@ exports.create = (req, res) => {
             }
         })
     }
+}
+
+exports.confirmRequest = (req, res) => {
+    const user = req.decode.user
+
+    const request_id = req.body.request_id
+    Request.findOne({ _id: request_id }, (err, request) => {
+        if (err) {
+            res.status(404).json({
+                ok: constants.requestResult.failure,
+                message: 'Request not found!!!'
+            })
+            return
+        }
+        if (request.status === constants.request_status.pending) {
+            if (request.request_type === constants.request_type.borrow) {
+                request.status = constants.request_status.accepted
+                request.save(err => {
+                    if (err) {
+                        res.status(500).json({ message: err });
+                        return
+                    }
+                    res.status(200).json({
+                        ok: constants.requestResult.success,
+                        message: 'Mượn sách thành công'
+                    })
+                    return
+                })
+            }
+        } else {
+            res.status(400).json({
+                ok: constants.requestResult.failure,
+                message: 'Yêu cầu không hợp lệ'
+            })
+            return
+        }
+    })
 }

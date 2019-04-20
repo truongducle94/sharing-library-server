@@ -22,7 +22,7 @@ var userSchema = mongoose.Schema({
         required: true,
     },
     gender: {
-        type: String,
+        type: Number,
         default: projectConst.gender.no_data,
     },
     rank: {
@@ -30,8 +30,8 @@ var userSchema = mongoose.Schema({
         default: projectConst.userRanking.bronze
     },
     point: {
-        type: String,
-        default: '0'
+        type: Number,
+        default: 0
     },
     contributed_books: Object,
     borrowing_books: Object,

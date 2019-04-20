@@ -29,5 +29,8 @@ router.route('/books')
 
 router.route('/request')
     .post(authMiddleware.verifyJwt, requestController.create)
+
+router.route('/confirm_request')
+    .post(authMiddleware.verifyJwt, requestController.confirmRequest)
 // Export API routes
 module.exports = router

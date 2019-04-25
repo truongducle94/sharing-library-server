@@ -97,3 +97,71 @@ exports.confirmRequest = (req, res) => {
         }
     })
 }
+
+//Lấy danh sách yêu cầu bản thân theo params
+exports.getRequest = (req, res) => {
+    const user = req.decode.user
+    const { status, page, per_page, request_type } = req.query
+    let limitNumber
+    let skipNumber
+    let data = { user_id: user._id }
+    if (!!status) {
+        Object.assign(data, { status })
+    }
+    if (!!request_type) {
+        Object.assign(data, { request_type })
+    }
+    if (!!parseInt(per_page)) {
+        if (!!parseInt(page)) {
+            limitNumber = parseInt(per_page) * parseInt(page)
+            skipNumber = parseInt(per_page) * (parseInt(page) - 1)
+        }
+        else {
+            limitNumber = parseInt(per_page)
+        }
+        console.log(limitNumber, 'limit')
+        console.log(skipNumber, 'skip')
+    }
+
+    Request.find(data, (err, requests) => {
+        if (err) {
+            res.json({
+                ok: 0,
+                message: err,
+            });
+            return
+        }
+        res.json({
+            ok: 1,
+            message: "Get list request success",
+            data: requests
+        });
+    }).skip(skipNumber).limit(limitNumber)
+}
+
+exports.getRequestById = (req, res) => {
+    const {request_id} = req.params
+    const user = req.decode.user
+    console.log()
+    Request.findById(request_id,(err, request) => {
+        if (err) {
+            res.json({
+                ok: 0,
+                message: err,
+            });
+            return
+        }
+        if (request.user_id != user._id) {
+            res.status(400).json({
+                ok: 0,
+                message: 'Người dùng không hợp lệ'
+            })
+            return
+        }
+        res.json({
+            ok: 1,
+            message: "Get request success",
+            data: request
+        });
+    })
+}

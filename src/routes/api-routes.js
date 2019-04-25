@@ -27,8 +27,12 @@ router.route('/books')
     .get(bookController.getAll)
     .post(authMiddleware.verifyJwt, bookController.create)
 
-router.route('/request')
+router.route('/requests')
+    .get(authMiddleware.verifyJwt, requestController.getRequest)
     .post(authMiddleware.verifyJwt, requestController.create)
+
+router.route('/requests/:request_id')
+    .get(authMiddleware.verifyJwt, requestController.getRequestById)
 
 router.route('/confirm_request')
     .post(authMiddleware.verifyJwt, requestController.confirmRequest)

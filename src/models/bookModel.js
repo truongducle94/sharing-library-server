@@ -16,6 +16,7 @@ var allBookSchema = mongoose.Schema({
     },
     description: {
         type: String,
+        required: true,
     },
     back_image: {
         type: String,

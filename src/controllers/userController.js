@@ -5,11 +5,11 @@ var projectConst = require('../library/utils/constants')
 var jwt = require('jsonwebtoken');
 const jwtConfig = require('../config/jwtConfig')
 
-async function onCheckingEmail(email) {
+async function onCheckingPhone(phone) {
     let check
-    await Users.findOne({ email: email }, function (err, user) {
+    await Users.findOne({ phone: phone }, function (err, user) {
         if (err) {
-            console.log('SERVER ERROR')
+            console.log('SERVER ERROR', err)
             return false
         }
         if (Boolean(user)) {
@@ -112,14 +112,17 @@ exports.getAll = (req, res) => {
 
 //Đăng ký
 exports.create = async (req, res) => {
-    let data = req.body
+    let data = {
+        phone: req.body.phone,
+        name: req.body.name,
+    }
     let password = req.body.password
-    const checkEmail = await onCheckingEmail(req.body.email)
-    if (checkEmail) {
+    const checkPhone = await onCheckingPhone(req.body.phone)
+    if (checkPhone) {
         bcrypt.hash(password, null, null, (err, hash_password) => {
             if (err) console.log(err, 'Lỗi')
             else {
-                data.hash_password = hash_password
+                Object.assign(data, { hash_password })
                 let user = new Users(data)
                 user.save((err, newUser) => {
                     if (err) {
@@ -139,7 +142,7 @@ exports.create = async (req, res) => {
         })
     } else res.json({
         ok: projectConst.requestResult.failure,
-        message: 'Email này đã được sử dụng'
+        message: 'Số điện thoại này đã được sử dụng'
     })
 }
 
@@ -161,10 +164,10 @@ exports.getProfile = (req, res) => {
 
 //đăng nhập
 exports.login = (req, res) => {
-    let email = req.body.email
+    let phone = req.body.phone
     let password = req.body.password
 
-    Users.findOne({ email: email }, (err, user) => {
+    Users.findOne({ phone: phone }, (err, user) => {
         if (err) {
             res.status(500).json({
                 ok: projectConst.requestResult.failure,
@@ -183,7 +186,7 @@ exports.login = (req, res) => {
                 }
                 if (checkPass) {
                     let payload = {
-                        email: user.email,
+                        phone: user.phone,
                         admin: user.admin,
                     }
                     jwt.sign(payload, jwtConfig.jwtSecret, { expiresIn: jwtConfig.expiresIn }, (err, token) => {
@@ -209,7 +212,7 @@ exports.login = (req, res) => {
             })
         } else res.json({
             ok: projectConst.requestResult.failure,
-            message: 'Email đăng nhập không tồn tại'
+            message: 'Số điện thoại đăng nhập không tồn tại'
         })
     })
 }

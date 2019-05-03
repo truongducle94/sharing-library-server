@@ -13,7 +13,7 @@ exports.verifyJwt = function (req, res, next) {
                     message: 'Unauthorized user!'
                 });
             } else {
-                Users.findOne({ email: payload.email }, (err, user) => {
+                Users.findOne({ phone: payload.phone }, (err, user) => {
                     if (err) {
                         res.status(500).json({
                             ok: projectConst.requestResult.failure,

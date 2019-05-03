@@ -6,10 +6,8 @@ var userSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    email: {
+    phone: {
         type: String,
-        unique: true,
-        lowercase: true,
         required: true,
     },
     hash_password: {
@@ -17,10 +15,6 @@ var userSchema = mongoose.Schema({
         required: true,
     },
     avatar: String,
-    phone: {
-        type: String,
-        required: true,
-    },
     gender: {
         type: Number,
         default: projectConst.gender.no_data,

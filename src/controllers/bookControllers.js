@@ -40,6 +40,13 @@ exports.create = (req, res) => {
             })
             return
         }
+        if (!req.decode.admin) {
+            res.status(401).json({
+                ok: constants.requestResult.failure,
+                message: 'UNAUTHORIZED',
+            })
+            return
+        }
 
         if (!req.body.name) {
             res.status(400).json({
@@ -52,6 +59,14 @@ exports.create = (req, res) => {
             res.status(400).json({
                 ok: constants.requestResult.failure,
                 message: 'Tên tác giả không được bỏ trống'
+            })
+            return
+        }
+
+        if (!req.body.description || req.body.description.length < 50 ) {
+            res.status(400).json({
+                ok: constants.requestResult.failure,
+                message: 'Mô tả sách cần ít nhất 50 ký tự'
             })
             return
         }

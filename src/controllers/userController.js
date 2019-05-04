@@ -145,8 +145,10 @@ exports.create = async (req, res) => {
                 res.status(201).json({
                     ok: projectConst.requestResult.success,
                     message: 'Đăng ký thành công',
-                    data: newUser,
-                    token,
+                    data: {
+                        info: newUser,
+                        token,
+                    },
                 })
             })
         })

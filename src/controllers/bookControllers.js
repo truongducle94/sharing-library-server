@@ -40,7 +40,7 @@ exports.create = (req, res) => {
             })
             return
         }
-        if (!req.decode.admin) {
+        if (!req.decode.user.admin) {
             res.status(401).json({
                 ok: constants.requestResult.failure,
                 message: 'UNAUTHORIZED',

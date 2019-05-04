@@ -5,22 +5,6 @@ var projectConst = require('../library/utils/constants')
 var jwt = require('jsonwebtoken');
 const jwtConfig = require('../config/jwtConfig')
 
-async function onCheckingPhone(phone) {
-    let check
-    await Users.findOne({ phone: phone }, function (err, user) {
-        if (err) {
-            console.log('SERVER ERROR', err)
-            return false
-        }
-        if (Boolean(user)) {
-            check = false
-        } else {
-            check = true
-        }
-    })
-    return check
-}
-
 //upload formdata config
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -86,7 +70,7 @@ exports.updateProfile = (req, res) => {
 
 //Lấy thông tin tất cả người dùng
 exports.getAll = (req, res) => {
-    if (req.decode.admin) {
+    if (req.decode.user.admin) {
         Users.get((err, users) => {
             if (err) {
                 res.status(500).json({
@@ -112,37 +96,60 @@ exports.getAll = (req, res) => {
 
 //Đăng ký
 exports.create = async (req, res) => {
+    const user = req.user
+    if (user) {
+        res.status(400).json({
+            ok: projectConst.requestResult.failure,
+            message: 'Số điện thoại đã được đăng ký'
+        })
+        return
+    }
+
     let data = {
         phone: req.body.phone,
         name: req.body.name,
     }
     let password = req.body.password
-    const checkPhone = await onCheckingPhone(req.body.phone)
-    if (checkPhone) {
-        bcrypt.hash(password, null, null, (err, hash_password) => {
-            if (err) console.log(err, 'Lỗi')
-            else {
-                Object.assign(data, { hash_password })
-                let user = new Users(data)
-                user.save((err, newUser) => {
-                    if (err) {
-                        res.json({
-                            ok: projectConst.requestResult.failure,
-                            message: err
-                        })
-                        return
-                    }
-                    res.status(201).json({
-                        ok: projectConst.requestResult.success,
-                        message: 'Tạo mới thành công',
-                        data: user
-                    });
+
+    bcrypt.hash(password, null, null, (err, hash_password) => {
+        if (err) {
+            console.log(err, 'Lỗi')
+            res.status(500).json({
+                ok: projectConst.requestResult.failure,
+                message: 'Internal Server'
+            })
+            return
+        }
+
+        Object.assign(data, { hash_password })
+        let user = new Users(data)
+        user.save((err, newUser) => {
+            if (err) {
+                res.json({
+                    ok: projectConst.requestResult.failure,
+                    message: err
                 })
+                return
             }
+            let payload = {
+                id: newUser._id.toString(),
+            }
+            jwt.sign(payload, jwtConfig.jwtSecret, { expiresIn: jwtConfig.expiresIn }, (err, token) => {
+                if (err) {
+                    res.json({
+                        ok: projectConst.requestResult.failure,
+                        message: err
+                    })
+                    return
+                }
+                res.status(201).json({
+                    ok: projectConst.requestResult.success,
+                    message: 'Đăng ký thành công',
+                    data: newUser,
+                    token,
+                })
+            })
         })
-    } else res.json({
-        ok: projectConst.requestResult.failure,
-        message: 'Số điện thoại này đã được sử dụng'
     })
 }
 
@@ -164,55 +171,49 @@ exports.getProfile = (req, res) => {
 
 //đăng nhập
 exports.login = (req, res) => {
-    let phone = req.body.phone
+    const user = req.user
+    if (!user) {
+        res.status(400).json({
+            ok: projectConst.requestResult.failure,
+            message: 'Số điện thoại không tồn tại'
+        })
+        return
+    }
+
     let password = req.body.password
 
-    Users.findOne({ phone: phone }, (err, user) => {
+    bcrypt.compare(password, user.hash_password, (err, checkPass) => {
         if (err) {
-            res.status(500).json({
+            res.status(401).json({
                 ok: projectConst.requestResult.failure,
-                message: 'Internal Server'
+                message: 'Sai mật khẩu'
             })
             return
         }
-        if (Boolean(user)) {
-            bcrypt.compare(password, user.hash_password, (err, checkPass) => {
+        if (checkPass) {
+            let payload = {
+                id: user._id.toString(),
+            }
+            jwt.sign(payload, jwtConfig.jwtSecret, { expiresIn: jwtConfig.expiresIn }, (err, token) => {
                 if (err) {
-                    res.status(500).json({
-                        ok: projectConst.requestResult.failure,
-                        message: 'Internal Server'
-                    })
+                    console.log(err)
                     return
                 }
-                if (checkPass) {
-                    let payload = {
-                        phone: user.phone,
-                        admin: user.admin,
+                res.status(200).json({
+                    ok: projectConst.requestResult.success,
+                    message: 'Đăng nhập thành công',
+                    data: {
+                        token: token,
+                        info: user,
                     }
-                    jwt.sign(payload, jwtConfig.jwtSecret, { expiresIn: jwtConfig.expiresIn }, (err, token) => {
-                        if (err) {
-                            console.log(err)
-                            return
-                        }
-                        res.status(200).json({
-                            ok: projectConst.requestResult.success,
-                            message: 'Đăng nhập thành công',
-                            data: {
-                                token: token,
-                                info: user,
-                            }
-                        })
-                    })
-                } else {
-                    res.json({
-                        ok: projectConst.requestResult.failure,
-                        message: 'Sai mật khẩu'
-                    })
-                }
+                })
             })
-        } else res.json({
-            ok: projectConst.requestResult.failure,
-            message: 'Số điện thoại đăng nhập không tồn tại'
-        })
+        } else {
+            res.json({
+                ok: projectConst.requestResult.failure,
+                message: 'Sai mật khẩu'
+            })
+        }
     })
+
 }

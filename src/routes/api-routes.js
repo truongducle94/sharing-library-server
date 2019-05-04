@@ -11,10 +11,11 @@ var userController = require('../controllers/userController')
 var bookController = require('../controllers/bookControllers')
 var requestController = require('../controllers/requestControllers')
 var authMiddleware = require('../middlewares/auth-middleware')
+var validateMiddleware = require('../middlewares/validate-middleware')
 
 // Đăng ký, đăng nhập
-router.post('/register', userController.create)
-router.post('/login', userController.login)
+router.post('/register', validateMiddleware.validatePhone, userController.create)
+router.post('/login', validateMiddleware.validatePhone, userController.login)
 
 // Liên quan đến người dùng
 router.route('/users')

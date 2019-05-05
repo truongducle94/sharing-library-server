@@ -12,9 +12,9 @@ var storage = multer.diskStorage({
     },
     filename: function (req, file, cb) {
         cb(null, file.originalname)
-    }
+    },
 })
-var upload = multer({ storage: storage }).single('user_avatar')
+var upload = multer({ storage: storage }).single('avatar')
 
 //update profile
 exports.updateProfile = (req, res) => {
@@ -26,6 +26,7 @@ exports.updateProfile = (req, res) => {
         })
         return
     }
+
     upload(req, res, function (error) {
         if (error) {
             res.status(400).json({
@@ -34,37 +35,51 @@ exports.updateProfile = (req, res) => {
             })
             return
         }
-        let validateCount = 0
-        Object.keys(req.body).map(value => {
-            if (!!req.body[value] && req.body[value] !== user[value]) {
-                user[value] = req.body[value]
-                console.log(123)
-                validateCount++
-            }
-        })
-        if (!!req.file && req.file.filename != user.avatar) {
-            user.avatar = req.file.filename
-            validateCount++
-        }
 
-        if (validateCount == 0) {
-            res.status(400).json({
-                ok: projectConst.requestResult.failure,
-                message: 'Không có thông tin nào cần thay đổi'
-            })
-            return
-        }
-        user.save(function (err) {
-            if (err) {
-                res.status(500).json({ message: err });
+        Users.findOne({ phone: req.body.phone }, (err, checkUser) => {
+            if (!!checkUser && (req.body.phone !== user.phone)) {
+                res.json({
+                    ok: projectConst.requestResult.failure,
+                    message: 'Số điện thoại đã được đăng ký',
+                })
                 return
             }
-            res.status(200).json({
-                ok: projectConst.requestResult.success,
-                message: 'Update thông tin thành công',
-                data: user
+
+            let validateCount = 0
+            Object.keys(req.body).map(value => {
+                if (value !== 'admin' && !!req.body[value] && req.body[value] !== user[value]) {
+                    user[value] = req.body[value]
+                    validateCount++
+                }
+            })
+            if (!!req.file && req.file.filename != user.avatar) {
+                user.avatar = req.file.filename
+                validateCount++
+            }
+
+            if (validateCount == 0) {
+                res.status(400).json({
+                    ok: projectConst.requestResult.failure,
+                    message: 'Không có thông tin nào cần thay đổi'
+                })
+                return
+            }
+
+            user.save(function (err) {
+                if (err) {
+                    res.status(500).json({
+                        ok: projectConst.requestResult.failure,
+                        message: err,
+                    });
+                    return
+                }
+                res.status(200).json({
+                    ok: projectConst.requestResult.success,
+                    message: 'Update thông tin thành công',
+                    data: user
+                });
             });
-        });
+        })
     })
 }
 

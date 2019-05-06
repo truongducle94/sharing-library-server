@@ -3,19 +3,21 @@ AllBooks = require('../models/bookModel')
 var constants = require('../library/utils/constants')
 
 exports.getCategory = (req, res) => {
-    BookCategory.get((err, categories) => {
+    const { limit } = req.query
+    BookCategory.find(null, (err, categories) => {
         if (err) {
             res.json({
                 ok: 0,
                 message: err,
             });
+            return
         }
         res.json({
             ok: 1,
             message: "Lấy danh mục sách thành công",
             data: categories
         });
-    })
+    }).limit(parseInt(limit))
 }
 
 exports.createCategory = (req, res) => {

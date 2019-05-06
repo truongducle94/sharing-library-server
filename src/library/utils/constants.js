@@ -25,7 +25,7 @@ module.exports = {
         unavailable: 2,
         pending: 0,
     },
-    kind_of_book: {
+    book_category: {
         programming: '0',
         detective: '1',
         science: '2',

@@ -13,9 +13,27 @@ var book_storage = multer.diskStorage({
 })
 var uploadBook = multer({ storage: book_storage }).fields([{ name: 'front_image', maxCount: 1 }, { name: 'back_image', maxCount: 1 }])
 
-//Lấy danh sách tất cả book
-exports.getAll = (req, res) => {
-    AllBooks.get((err, books) => {
+//Lấy danh sách book
+exports.getBook = (req, res) => {
+    const { category_id, page, per_page } = req.query
+    let data = {}
+    let limitNumber
+    let skipNumber
+    if (!!category_id) {
+        data = Object.assign(data, { category_id })
+    }
+    if (!!parseInt(per_page)) {
+        if (!!parseInt(page)) {
+            limitNumber = parseInt(per_page) * parseInt(page)
+            skipNumber = parseInt(per_page) * (parseInt(page) - 1)
+        }
+        else {
+            limitNumber = parseInt(per_page)
+        }
+        console.log(limitNumber, 'limit')
+        console.log(skipNumber, 'skip')
+    }
+    AllBooks.find(data, (err, books) => {
         if (err) {
             res.json({
                 ok: 0,
@@ -27,7 +45,7 @@ exports.getAll = (req, res) => {
             message: "Book retrieved successfully",
             data: books
         });
-    })
+    }).skip(skipNumber).limit(limitNumber)
 }
 
 //Tạo mới book
@@ -63,7 +81,15 @@ exports.create = (req, res) => {
             return
         }
 
-        if (!req.body.description || req.body.description.length < 50 ) {
+        if (!req.body.category_id) {
+            res.status(400).json({
+                ok: constants.requestResult.failure,
+                message: 'Danh mục không được bỏ trống',
+            })
+            return
+        }
+
+        if (!req.body.description || req.body.description.length < 50) {
             res.status(400).json({
                 ok: constants.requestResult.failure,
                 message: 'Mô tả sách cần ít nhất 50 ký tự'

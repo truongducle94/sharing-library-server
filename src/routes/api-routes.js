@@ -10,6 +10,7 @@ router.get('/', function (req, res) {
 var userController = require('../controllers/userController')
 var bookController = require('../controllers/bookControllers')
 var requestController = require('../controllers/requestControllers')
+var categoryController = require('../controllers/categoryControllers')
 var authMiddleware = require('../middlewares/auth-middleware')
 var validateMiddleware = require('../middlewares/validate-middleware')
 
@@ -25,7 +26,7 @@ router.route('/profile')
     .put(authMiddleware.verifyJwt, userController.updateProfile)
 
 router.route('/books')
-    .get(bookController.getAll)
+    .get(bookController.getBook)
     .post(authMiddleware.verifyJwt, bookController.create)
 
 router.route('/requests')
@@ -37,5 +38,10 @@ router.route('/requests/:request_id')
 
 router.route('/confirm_request')
     .post(authMiddleware.verifyJwt, requestController.confirmRequest)
+
+//category
+router.route('/category')
+    .get(categoryController.getCategory)
+    .post(authMiddleware.verifyJwt, categoryController.createCategory)
 // Export API routes
 module.exports = router

@@ -1,7 +1,7 @@
 Users = require('../models/userModel')
 const bcrypt = require('bcrypt-nodejs')
 var multer = require('multer')
-var projectConst = require('../library/utils/constants')
+var constants = require('../library/utils/constants')
 var jwt = require('jsonwebtoken');
 const jwtConfig = require('../config/jwtConfig')
 
@@ -21,7 +21,7 @@ exports.updateProfile = (req, res) => {
     const user = req.decode.user
     if (!user) {
         res.status(401).json({
-            ok: projectConst.requestResult.failure,
+            ok: constants.requestResult.failure,
             message: 'Người dùng không hợp lệ',
         })
         return
@@ -39,7 +39,7 @@ exports.updateProfile = (req, res) => {
         Users.findOne({ phone: req.body.phone }, (err, checkUser) => {
             if (!!checkUser && (req.body.phone !== user.phone)) {
                 res.json({
-                    ok: projectConst.requestResult.failure,
+                    ok: constants.requestResult.failure,
                     message: 'Số điện thoại đã được đăng ký',
                 })
                 return
@@ -59,7 +59,7 @@ exports.updateProfile = (req, res) => {
 
             if (validateCount == 0) {
                 res.status(400).json({
-                    ok: projectConst.requestResult.failure,
+                    ok: constants.requestResult.failure,
                     message: 'Không có thông tin nào cần thay đổi'
                 })
                 return
@@ -68,13 +68,13 @@ exports.updateProfile = (req, res) => {
             user.save(function (err) {
                 if (err) {
                     res.status(500).json({
-                        ok: projectConst.requestResult.failure,
+                        ok: constants.requestResult.failure,
                         message: err,
                     });
                     return
                 }
                 res.status(200).json({
-                    ok: projectConst.requestResult.success,
+                    ok: constants.requestResult.success,
                     message: 'Update thông tin thành công',
                     data: user
                 });
@@ -89,20 +89,20 @@ exports.getAll = (req, res) => {
         Users.get((err, users) => {
             if (err) {
                 res.status(500).json({
-                    ok: projectConst.requestResult.failure,
+                    ok: constants.requestResult.failure,
                     message: err,
                 });
                 return
             }
             res.status(200).json({
-                ok: projectConst.requestResult.success,
+                ok: constants.requestResult.success,
                 message: "Lấy thông tin tất cả người dùng thành công",
                 data: users
             });
         })
     } else {
         res.status(401).json({
-            ok: projectConst.requestResult.failure,
+            ok: constants.requestResult.failure,
             message: 'UNAUTHORIZED',
         })
     }
@@ -114,7 +114,7 @@ exports.create = async (req, res) => {
     const user = req.user
     if (user) {
         res.status(400).json({
-            ok: projectConst.requestResult.failure,
+            ok: constants.requestResult.failure,
             message: 'Số điện thoại đã được đăng ký'
         })
         return
@@ -130,7 +130,7 @@ exports.create = async (req, res) => {
         if (err) {
             console.log(err, 'Lỗi')
             res.status(500).json({
-                ok: projectConst.requestResult.failure,
+                ok: constants.requestResult.failure,
                 message: 'Internal Server'
             })
             return
@@ -141,7 +141,7 @@ exports.create = async (req, res) => {
         user.save((err, newUser) => {
             if (err) {
                 res.json({
-                    ok: projectConst.requestResult.failure,
+                    ok: constants.requestResult.failure,
                     message: err
                 })
                 return
@@ -152,13 +152,13 @@ exports.create = async (req, res) => {
             jwt.sign(payload, jwtConfig.jwtSecret, { expiresIn: jwtConfig.expiresIn }, (err, token) => {
                 if (err) {
                     res.json({
-                        ok: projectConst.requestResult.failure,
+                        ok: constants.requestResult.failure,
                         message: err
                     })
                     return
                 }
                 res.status(201).json({
-                    ok: projectConst.requestResult.success,
+                    ok: constants.requestResult.success,
                     message: 'Đăng ký thành công',
                     data: {
                         info: newUser,
@@ -174,13 +174,13 @@ exports.create = async (req, res) => {
 exports.getProfile = (req, res) => {
     if (!req.decode.user) {
         res.status(401).json({
-            ok: projectConst.requestResult.failure,
+            ok: constants.requestResult.failure,
             message: 'Người dùng không hợp lệ',
         })
         return
     }
     res.status(200).json({
-        ok: projectConst.requestResult.success,
+        ok: constants.requestResult.success,
         message: 'Lấy thông tin thành công',
         data: req.decode.user
     })
@@ -191,7 +191,7 @@ exports.login = (req, res) => {
     const user = req.user
     if (!user) {
         res.status(400).json({
-            ok: projectConst.requestResult.failure,
+            ok: constants.requestResult.failure,
             message: 'Số điện thoại không tồn tại'
         })
         return
@@ -202,7 +202,7 @@ exports.login = (req, res) => {
     bcrypt.compare(password, user.hash_password, (err, checkPass) => {
         if (err) {
             res.status(401).json({
-                ok: projectConst.requestResult.failure,
+                ok: constants.requestResult.failure,
                 message: 'Sai mật khẩu'
             })
             return
@@ -217,7 +217,7 @@ exports.login = (req, res) => {
                     return
                 }
                 res.status(200).json({
-                    ok: projectConst.requestResult.success,
+                    ok: constants.requestResult.success,
                     message: 'Đăng nhập thành công',
                     data: {
                         token: token,
@@ -227,7 +227,7 @@ exports.login = (req, res) => {
             })
         } else {
             res.json({
-                ok: projectConst.requestResult.failure,
+                ok: constants.requestResult.failure,
                 message: 'Sai mật khẩu'
             })
         }

@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-const projectConst = require('../library/utils/constants')
+const constants = require('../library/utils/constants')
 
 var userSchema = mongoose.Schema({
     name: {
@@ -17,11 +17,11 @@ var userSchema = mongoose.Schema({
     avatar: String,
     gender: {
         type: Number,
-        default: projectConst.gender.no_data,
+        default: constants.gender.no_data,
     },
     rank: {
         type: String,
-        default: projectConst.userRanking.bronze
+        default: constants.userRanking.bronze
     },
     point: {
         type: Number,

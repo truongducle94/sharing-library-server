@@ -10,9 +10,9 @@ var allBookSchema = mongoose.Schema({
         type: String,
         required: true,
     },
-    kind: {
+    category_id: {
         type: String,
-        default: constants.kind_of_book.other,
+        required: true,
     },
     description: {
         type: String,

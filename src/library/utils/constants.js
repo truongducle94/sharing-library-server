@@ -3,11 +3,13 @@ module.exports = {
         failure: 0,
         success: 1,
     },
+    ms_per_day: 5,
+
     saltRound: 12,
     userRanking: {
-        bronze: 'bronze',
-        silver: 'silver',
-        gold: 'gold',
+        bronze: 0,
+        silver: 1,
+        gold: 2,
     },
     request_status: {
         pending: 1,
@@ -38,5 +40,24 @@ module.exports = {
     request_type: {
         borrow: 1,
         contribute: 2,
+    },
+
+    //count by days
+    borrow_limit: {
+        bronze: 7,
+        silver: 10,
+        gold: 15,
+    },
+
+    //count by point
+    penalty_point: {
+        less_than_one: 10,
+        less_than_two: 20,
+        less_than_three: 30,
+        over_than_three: 100,
+    },
+
+    bonus_point: {
+        per_book: 100,
     }
 }

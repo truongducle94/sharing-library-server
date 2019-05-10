@@ -29,6 +29,7 @@ router.route('/books')
     .get(bookController.getBook)
     .post(authMiddleware.verifyJwt, bookController.create)
 
+// Yêu cầu
 router.route('/requests')
     .get(authMiddleware.verifyJwt, requestController.getRequest)
     .post(authMiddleware.verifyJwt, requestController.create)
@@ -36,8 +37,13 @@ router.route('/requests')
 router.route('/requests/:request_id')
     .get(authMiddleware.verifyJwt, requestController.getRequestById)
 
+//Xác nhận yêu cầu
 router.route('/confirm_request')
     .post(authMiddleware.verifyJwt, requestController.confirmRequest)
+
+//Trả sách
+router.route('/return_book')
+    .post(requestController.giveBookBack)
 
 //category
 router.route('/category')

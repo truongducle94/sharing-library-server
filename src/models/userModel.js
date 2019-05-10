@@ -20,7 +20,7 @@ var userSchema = mongoose.Schema({
         default: constants.gender.no_data,
     },
     rank: {
-        type: String,
+        type: Number,
         default: constants.userRanking.bronze
     },
     point: {
@@ -33,13 +33,16 @@ var userSchema = mongoose.Schema({
     admin: {
         type: Boolean,
         default: false
+    },
+    created_at: {
+        type: String,
+        default: '',
+    },
+    updated_at: {
+        type: String,
+        default: ''
     }
-}, {
-        timestamps: {
-            createdAt: 'created_at',
-            updatedAt: 'updated_at'
-        }
-    });
+});
 
 userSchema.methods.toJSON = function () {
     var user = this.toObject();

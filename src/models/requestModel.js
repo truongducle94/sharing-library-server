@@ -14,15 +14,21 @@ var requestSchema = mongoose.Schema({
         type: String,
         required: true,
     },
+    user_rank: {
+        type: Number,
+        require: true,
+    },
     status: {
         type: Number,
         default: constant.request_status.pending
-    }
-}, 
-{
-    timestamps: {
-            createdAt: 'created_at',
-            updatedAt: 'updated_at'
+    },
+    created_at: {
+        type: String,
+        default: '',
+    },
+    updated_at: {
+        type: String,
+        default: '',
     }
 });
 

@@ -30,12 +30,9 @@ var allBookSchema = mongoose.Schema({
         type: Number,
         default: constants.book_status.pending
     },
-    qr_code: String,
     review_id: Array,
     contributor_id: String,
-    borrow_at: Date,
-    deadline_at: Date,
-    times_borrow: Number,
+    on_request_id: String,
     average_point: String,
 }, 
 {

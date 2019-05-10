@@ -65,6 +65,8 @@ exports.updateProfile = (req, res) => {
                 return
             }
 
+            user.updated_at = new Date().getTime().toString()
+
             user.save(function (err) {
                 if (err) {
                     res.status(500).json({
@@ -136,7 +138,7 @@ exports.create = async (req, res) => {
             return
         }
 
-        Object.assign(data, { hash_password })
+        Object.assign(data, { hash_password, created_at: new Date().getTime().toString() })
         let user = new Users(data)
         user.save((err, newUser) => {
             if (err) {

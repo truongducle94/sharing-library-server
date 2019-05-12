@@ -23,12 +23,10 @@ var requestSchema = mongoose.Schema({
         default: constant.request_status.pending
     },
     created_at: {
-        type: String,
-        default: '',
+        type: Number,
     },
     updated_at: {
-        type: String,
-        default: '',
+        type: Number,
     }
 });
 

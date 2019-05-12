@@ -65,7 +65,7 @@ exports.updateProfile = (req, res) => {
                 return
             }
 
-            user.updated_at = new Date().getTime().toString()
+            user.updated_at = new Date().getTime()
 
             user.save(function (err) {
                 if (err) {
@@ -138,7 +138,7 @@ exports.create = async (req, res) => {
             return
         }
 
-        Object.assign(data, { hash_password, created_at: new Date().getTime().toString() })
+        Object.assign(data, { hash_password, created_at: new Date().getTime() })
         let user = new Users(data)
         user.save((err, newUser) => {
             if (err) {

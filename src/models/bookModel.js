@@ -34,11 +34,11 @@ var allBookSchema = mongoose.Schema({
     contributor_id: String,
     on_request_id: String,
     average_point: String,
-}, 
-{
-    timestamps: {
-            createdAt: 'created_at',
-            updatedAt: 'updated_at'
+    created_at: {
+        type: Number,
+    },
+    updated_at: {
+        type: Number,
     }
 });
 

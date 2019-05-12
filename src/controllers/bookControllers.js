@@ -108,6 +108,7 @@ exports.create = (req, res) => {
         let book = new AllBooks(req.body)
         book.front_image = req.files['front_image'][0].filename
         book.back_image = req.files['back_image'][0].filename
+        book.created_at = new Date().getTime()
         book.save((err, book) => {
             if (err) {
                 res.status(500).json({

@@ -35,12 +35,10 @@ var userSchema = mongoose.Schema({
         default: false
     },
     created_at: {
-        type: String,
-        default: '',
+        type: Number,
     },
     updated_at: {
-        type: String,
-        default: ''
+        type: Number,
     }
 });
 

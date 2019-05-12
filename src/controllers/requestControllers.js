@@ -2,7 +2,18 @@ Requests = require('../models/requestModel')
 AllBooks = require('../models/bookModel')
 Users = require('../controllers/userController')
 var constants = require('../library/utils/constants')
-var QRCode = require('qrcode')
+var multer = require('multer')
+
+var book_storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './public/uploads/books')
+    },
+    filename: function (req, file, cb) {
+        cb(null, `${file.fieldname}-${Date.now()}.png`)
+    }
+})
+var uploadBook = multer({ storage: book_storage }).fields([{ name: 'front_image', maxCount: 1 }, { name: 'back_image', maxCount: 1 }])
+
 
 function countPointByBorrowTime(time) {
     if (time < 0) {
@@ -46,7 +57,7 @@ function checkTimeBorrow(time, user_rank) {
 // req.data should be: {
 //     user_id, user_rank, data
 // }
-exports.create = (req, res) => {
+exports.createRequestBorrow = (req, res) => {
     const user = req.decode.user
 
     if (req.body.request_type === constants.request_type.borrow) {
@@ -68,7 +79,7 @@ exports.create = (req, res) => {
                         data: req.body.data,
                     }
                     let request = new Requests(request_data)
-                    Object.assign(request, { created_at: new Date().getTime().toString() })
+                    Object.assign(request, { created_at: new Date().getTime() })
                     request.save(function (err, newRequest) {
                         if (err) {
                             res.status(500).json({ message: err });
@@ -83,7 +94,7 @@ exports.create = (req, res) => {
                         })
                         book.status = constants.book_status.unavailable
                         book.on_request_id = newRequest._id.toString()
-                        book.updated_at = new Date().getTime().toString()
+                        book.updated_at = new Date().getTime()
                         book.save(function (err) {
                             console.log(err)
                         });
@@ -102,12 +113,120 @@ exports.create = (req, res) => {
                 })
             }
         })
+    } else {
+        res.status(400).json({
+            ok: constants.requestResult.failure,
+            message: 'Bad request'
+        })
     }
+}
+
+// Yêu cầu đóng góp sách
+exports.createRequestContribute = (req, res) => {
+    uploadBook(req, res, function (error) {
+        const user = req.decode.user
+        if (error) {
+            res.status(400).json({
+                ok: 0,
+                message: 'BAD REQUEST'
+            })
+            return
+        }
+        if (parseInt(req.body.request_type) !== constants.request_type.contribute) {
+            res.status(400).json({
+                ok: constants.requestResult.failure,
+                message: 'Bad request'
+            })
+            return
+        }
+
+        if (!req.body.name) {
+            res.status(400).json({
+                ok: constants.requestResult.failure,
+                message: 'Tên sách không được bỏ trống'
+            })
+            return
+        }
+        if (!req.body.author) {
+            res.status(400).json({
+                ok: constants.requestResult.failure,
+                message: 'Tên tác giả không được bỏ trống'
+            })
+            return
+        }
+
+        if (!req.body.category_id) {
+            res.status(400).json({
+                ok: constants.requestResult.failure,
+                message: 'Danh mục không được bỏ trống',
+            })
+            return
+        }
+
+        if (!req.body.description || req.body.description.length < 50) {
+            res.status(400).json({
+                ok: constants.requestResult.failure,
+                message: 'Mô tả sách cần ít nhất 50 ký tự'
+            })
+            return
+        }
+
+        if (!req.files || !req.files['back_image'] || !req.files['front_image']) {
+            res.status(400).json({
+                ok: constants.requestResult.failure,
+                message: 'Sách cần có đủ 2 ảnh bìa'
+            })
+            return
+        }
+
+        let book = new AllBooks(req.body)
+        book.front_image = req.files['front_image'][0].filename
+        book.back_image = req.files['back_image'][0].filename
+        book.created_at = new Date().getTime()
+        book.contributor_id = user._id.toString()
+        book.save((err, book) => {
+            if (err) {
+                res.status(500).json({
+                    ok: 0,
+                    message: err
+                })
+                return
+            }
+            let request_data = {
+                request_type: req.body.request_type,
+                user_id: user._id.toString(),
+                user_rank: user.rank,
+                data: {
+                    book_id: book._id.toString(),
+                    book_name: book.name,
+                },
+            }
+            let request = new Requests(request_data)
+            Object.assign(request, { created_at: new Date().getTime() })
+            request.save(function (err, newRequest) {
+                if (err) {
+                    res.status(500).json({ message: err });
+                    return
+                }
+                res.status(200).json({
+                    ok: constants.requestResult.success,
+                    message: 'Yêu cầu đã được gửi. Đang xử lý!!!',
+                    data: {
+                        request_id: newRequest._id.toString()
+                    }
+                })
+                book.on_request_id = newRequest._id.toString()
+                book.save(err => {
+                    console.log(err, 'errrrrrr')
+                })
+            })
+        })
+    })
 }
 
 exports.confirmRequest = (req, res) => {
     const user = req.decode.user
-
+    const time_send_req = new Date().getTime()
     const request_id = req.body.request_id
     Requests.findOne({ _id: request_id }, (err, request) => {
         if (err) {
@@ -129,7 +248,7 @@ exports.confirmRequest = (req, res) => {
         if (request.status === constants.request_status.pending) {
             if (request.request_type === constants.request_type.borrow) {
                 request.status = constants.request_status.accepted
-                request.updated_at = new Date().getTime().toString()
+                request.updated_at = time_send_req
                 request.save((err, updatedRequest) => {
                     if (err) {
                         res.status(500).json({ message: err });
@@ -143,6 +262,39 @@ exports.confirmRequest = (req, res) => {
                     return
                 })
             }
+
+            if (request.request_type === constants.request_type.contribute) {
+                AllBooks.findOne({ on_request_id: request_id }, (err, book) => {
+                    if (err) {
+                        res.json({
+                            ok: constants.requestResult.failure,
+                            message: 'BAD REQUEST',
+                        })
+                        return
+                    }
+                    request.status = constants.request_status.finished
+                    request.updated_at = time_send_req
+                    request.save((err, updatedRequest) => {
+                        if (err) {
+                            res.status(500).json({ message: err });
+                            return
+                        }
+                        res.status(200).json({
+                            ok: constants.requestResult.success,
+                            message: 'Đóng góp sách thành công',
+                            data: updatedRequest.data,
+                        })
+                        book.status = constants.book_status.available
+                        book.on_request_id = ''
+                        book.updated_at = time_send_req
+                        book.save(err => {
+                            console.log(err)
+                        })
+                        return
+                    })
+                })
+            }
+
         } else {
             res.status(400).json({
                 ok: constants.requestResult.failure,
@@ -175,10 +327,10 @@ exports.giveBookBack = (req, res) => {
                 return
             }
             if (request.status === constants.request_status.accepted) {
-                const time_borrowed = parseInt(request.updated_at)
+                const time_borrowed = request.updated_at
                 //update request
                 request.status = constants.request_status.finished
-                request.updated_at = new Date().getTime().toString()
+                request.updated_at = new Date().getTime()
                 request.save((err, updatedRequest) => {
                     if (err) {
                         res.json({
@@ -194,14 +346,14 @@ exports.giveBookBack = (req, res) => {
 
                     // update book_status
                     book.status = constants.book_status.available
-                    book.updated_at = new Date().getTime().toString()
+                    book.updated_at = new Date().getTime()
                     book.on_request_id = ''
                     book.save((err) => {
                         //need to push notify confirm return book here....
                     })
 
                     //update user_point
-                    const time_returned = parseInt(updatedRequest.updated_at)
+                    const time_returned = updatedRequest.updated_at
                     let distance = (time_returned - time_borrowed) / constants.ms_per_day
                     const penalty_point = checkTimeBorrow(distance)
                     console.log(penalty_point, 'AAAAAAAAAAAA')

@@ -29,15 +29,22 @@ router.route('/books')
     .get(bookController.getBook)
     .post(authMiddleware.verifyJwt, bookController.create)
 
-// Yêu cầu
+// Get Yêu cầu
 router.route('/requests')
     .get(authMiddleware.verifyJwt, requestController.getRequest)
-    .post(authMiddleware.verifyJwt, requestController.create)
 
 router.route('/requests/:request_id')
     .get(authMiddleware.verifyJwt, requestController.getRequestById)
 
-//Xác nhận yêu cầu
+// Yeu cau muon sach
+router.route('/request_borrow')
+    .post(authMiddleware.verifyJwt, requestController.createRequestBorrow)
+
+// Yeu cau dong gop sach
+router.route('/request_contribute')
+    .post(authMiddleware.verifyJwt, requestController.createRequestContribute)
+
+// Xác nhận yêu cầu
 router.route('/confirm_request')
     .post(authMiddleware.verifyJwt, requestController.confirmRequest)
 

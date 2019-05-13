@@ -274,6 +274,7 @@ exports.confirmRequest = (req, res) => {
                             ok: constants.requestResult.success,
                             message: 'Đóng góp sách thành công',
                             data: updatedRequest.data,
+                            isContribute: true,
                         })
                         book.status = constants.book_status.available
                         book.on_request_id = ''

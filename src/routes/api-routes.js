@@ -46,7 +46,7 @@ router.route('/request_contribute')
 
 // Xác nhận yêu cầu
 router.route('/confirm_request')
-    .post(authMiddleware.verifyJwt, requestController.confirmRequest)
+    .post(requestController.confirmRequest)
 
 //Trả sách
 router.route('/return_book')

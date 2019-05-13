@@ -225,7 +225,6 @@ exports.createRequestContribute = (req, res) => {
 }
 
 exports.confirmRequest = (req, res) => {
-    const user = req.decode.user
     const time_send_req = new Date().getTime()
     const request_id = req.body.request_id
     Requests.findOne({ _id: request_id }, (err, request) => {
@@ -233,14 +232,6 @@ exports.confirmRequest = (req, res) => {
             res.status(404).json({
                 ok: constants.requestResult.failure,
                 message: 'Request not found!!!'
-            })
-            return
-        }
-
-        if (request.user_id != user._id.toString()) {
-            res.status(401).json({
-                ok: constants.requestResult.failure,
-                message: 'Người dùng không hợp lệ!'
             })
             return
         }

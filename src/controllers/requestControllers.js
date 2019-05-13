@@ -3,6 +3,7 @@ AllBooks = require('../models/bookModel')
 Users = require('../controllers/userController')
 var constants = require('../library/utils/constants')
 var multer = require('multer')
+var apis = require('../library/apis/index')
 
 var book_storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -14,6 +15,19 @@ var book_storage = multer.diskStorage({
 })
 var uploadBook = multer({ storage: book_storage }).fields([{ name: 'front_image', maxCount: 1 }, { name: 'back_image', maxCount: 1 }])
 
+function sendNotification(title, contents, user_id, subData) {
+    const data = {
+        headings: { "en": `${title}` },
+        contents: { "en": `${contents}` },
+        included_segments: ["Active Users"],
+        filters: [
+            { "field": "tag", "key": "user_id", "relation": "=", "value": `${user_id}` },
+        ],
+        data: subData,
+    }
+
+    apis.pushNotification(data)
+}
 
 function countPointByBorrowTime(time) {
     if (time < 0) {
@@ -407,6 +421,8 @@ exports.getRequest = (req, res) => {
             message: "Get list request success",
             data: requests
         });
+        sendNotification('hello', 'how are you guys')
+
     }).skip(skipNumber).limit(limitNumber)
 }
 

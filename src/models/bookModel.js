@@ -42,6 +42,13 @@ var allBookSchema = mongoose.Schema({
     }
 });
 
+allBookSchema.methods.toJSON = function () {
+    let book = this.toObject();
+    book.contributor_id = undefined
+    book.on_request_id = undefined
+    return book;
+}
+
 var AllBooks = module.exports= mongoose.model('books', allBookSchema)
 
 module.exports.get = function (callback, limit) {

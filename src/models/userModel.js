@@ -43,7 +43,7 @@ var userSchema = mongoose.Schema({
 });
 
 userSchema.methods.toJSON = function () {
-    var user = this.toObject();
+    let user = this.toObject();
     user.hash_password = undefined
     return user;
 }

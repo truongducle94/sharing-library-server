@@ -30,6 +30,12 @@ var requestSchema = mongoose.Schema({
     }
 });
 
+requestSchema.methods.toJSON = function () {
+    let request = this.toObject();
+    request.user_id = undefined
+    return request;
+}
+
 var Requests = module.exports= mongoose.model('requests', requestSchema)
 
 module.exports.get = function (callback, limit) {

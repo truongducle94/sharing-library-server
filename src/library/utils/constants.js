@@ -59,5 +59,5 @@ module.exports = {
 
     bonus_point: {
         per_book: 100,
-    }
+    },
 }

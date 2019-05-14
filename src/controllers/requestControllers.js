@@ -2,6 +2,7 @@ Requests = require('../models/requestModel')
 AllBooks = require('../models/bookModel')
 Users = require('../controllers/userController')
 var constants = require('../library/utils/constants')
+var NOTIFY_CONSTANTS = require('../library/utils/notification-const')
 var multer = require('multer')
 var apis = require('../library/apis/index')
 
@@ -14,20 +15,6 @@ var book_storage = multer.diskStorage({
     }
 })
 var uploadBook = multer({ storage: book_storage }).fields([{ name: 'front_image', maxCount: 1 }, { name: 'back_image', maxCount: 1 }])
-
-function sendNotification(title, contents, user_id, subData) {
-    const data = {
-        headings: { "en": `${title}` },
-        contents: { "en": `${contents}` },
-        included_segments: ["Active Users"],
-        filters: [
-            { "field": "tag", "key": "user_id", "relation": "=", "value": `${user_id}` },
-        ],
-        data: subData,
-    }
-
-    apis.pushNotification(data)
-}
 
 function countPointByBorrowTime(time) {
     if (time < 0) {
@@ -112,6 +99,15 @@ exports.createRequestBorrow = (req, res) => {
                         book.save(function (err) {
                             console.log(err)
                         });
+                        const heading = NOTIFY_CONSTANTS.NOTIFY_HEADING.REQUEST
+                        const content = NOTIFY_CONSTANTS.NOTIFY_CONTENT.REQUEST_BORROW_SENDING
+                        const subData = {
+                            type: NOTIFY_CONSTANTS.NOTIFY_TYPE.REQUEST,
+                            data: {
+                                request_data: newRequest,
+                            }
+                        }
+                        apis.pushNotifcation(user._id, heading, content, subData)
                         return
                     })
                 } else {
@@ -233,6 +229,15 @@ exports.createRequestContribute = (req, res) => {
                 book.save(err => {
                     console.log(err, 'errrrrrr')
                 })
+                const heading = NOTIFY_CONSTANTS.NOTIFY_HEADING.REQUEST
+                const content = NOTIFY_CONSTANTS.NOTIFY_CONTENT.REQUEST_CONTRIBUTE_SENDING
+                const subData = {
+                    type: NOTIFY_CONSTANTS.NOTIFY_TYPE.REQUEST,
+                    data: {
+                        request_data: newRequest,
+                    }
+                }
+                apis.pushNotifcation(user._id, heading, content, subData)
             })
         })
     })
@@ -264,6 +269,15 @@ exports.confirmRequest = (req, res) => {
                         message: 'Mượn sách thành công',
                         data: updatedRequest.data,
                     })
+                    const heading = NOTIFY_CONSTANTS.NOTIFY_HEADING.REQUEST
+                    const content = NOTIFY_CONSTANTS.NOTIFY_CONTENT.REQUEST_BORROW_CONFIRM
+                    const subData = {
+                        type: NOTIFY_CONSTANTS.NOTIFY_TYPE.REQUEST,
+                        data: {
+                            request_data: updatedRequest,
+                        }
+                    }
+                    apis.pushNotifcation(updatedRequest.user_id, heading, content, subData)
                     return
                 })
             }
@@ -296,6 +310,15 @@ exports.confirmRequest = (req, res) => {
                         book.save(err => {
                             console.log(err)
                         })
+                        const heading = NOTIFY_CONSTANTS.NOTIFY_HEADING.REQUEST
+                        const content = NOTIFY_CONSTANTS.NOTIFY_CONTENT.REQUEST_CONTRIBUTE_CONFIRM
+                        const subData = {
+                            type: NOTIFY_CONSTANTS.NOTIFY_TYPE.REQUEST,
+                            data: {
+                                request_data: updatedRequest,
+                            }
+                        }
+                        apis.pushNotifcation(updatedRequest.user_id, heading, content, subData)
                         return
                     })
                 })
@@ -356,18 +379,32 @@ exports.giveBookBack = (req, res) => {
                     book.on_request_id = ''
                     book.save((err) => {
                         //need to push notify confirm return book here....
+                        const heading = NOTIFY_CONSTANTS.NOTIFY_HEADING.RETURN_BOOK
+                        const content = NOTIFY_CONSTANTS.NOTIFY_CONTENT.RETURN_BOOK
+                        const subData = {
+                            type: NOTIFY_CONSTANTS.NOTIFY_TYPE.REQUEST,
+                            data: {
+                                request_data: updatedRequest,
+                            }
+                        }
+                        apis.pushNotifcation(updatedRequest.user_id, heading, content, subData)
                     })
 
                     //update user_point
                     const time_returned = updatedRequest.updated_at
                     let distance = (time_returned - time_borrowed) / constants.ms_per_day
-                    const penalty_point = checkTimeBorrow(distance)
-                    console.log(penalty_point, 'AAAAAAAAAAAA')
+                    const penalty_point = checkTimeBorrow(distance, updatedRequest.user_rank)
                     Users.findById(updatedRequest.user_id, (err, user) => {
                         user.point = user.point - penalty_point
                         user.save(err => {
                             if (penalty_point > 0) {
                                 //push notify.....
+                                const heading = NOTIFY_CONSTANTS.NOTIFY_HEADING.POINT
+                                const content = NOTIFY_CONSTANTS.NOTIFY_CONTENT.POINT_PENALTY(penalty_point)
+                                const subData = {
+                                    type: NOTIFY_CONSTANTS.NOTIFY_TYPE.POINT,
+                                }
+                                apis.pushNotifcation(user._id, heading, content, subData)
                             }
                         })
                     })
@@ -421,8 +458,6 @@ exports.getRequest = (req, res) => {
             message: "Get list request success",
             data: requests
         });
-        sendNotification('hello', 'how are you guys')
-
     }).skip(skipNumber).limit(limitNumber)
 }
 

@@ -1,5 +1,6 @@
 var axios = require('axios')
 var config = require('../../config/config')
+var NOTIFY_CONSTANTS = require('../utils/notification-const')
 
 var instance = axios.create({
     baseURL: config.ONE_SIGNAL_BASE_API,
@@ -10,11 +11,18 @@ var instance = axios.create({
       }
 })
 
-exports.pushNotification = (data) => {
-    const notificationData = {
+exports.pushNotifcation = (user_id, title, contents, subData) => {
+    let notificationData = {
         app_id: config.ONE_SIGNAL_APP_ID,
-        ...data,
+        headings: { "en": `${title}` },
+        contents: { "en": `${contents}` },
+        included_segments: ["Active Users"],
+        filters: [
+            { "field": "tag", "key": "user_id", "relation": "=", "value": `${user_id}` },
+        ],
+        data: subData,
     }
+
     return instance.post('', notificationData)
     .then(res => {
         return res.data

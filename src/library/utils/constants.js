@@ -3,7 +3,7 @@ module.exports = {
         failure: 0,
         success: 1,
     },
-    ms_per_day: 5,
+    ms_per_day: 86400000, // 1 day by miliseconds 
 
     saltRound: 12,
     userRanking: {
@@ -42,11 +42,11 @@ module.exports = {
         contribute: 2,
     },
 
-    //count by days
+    //count by timestamp
     borrow_limit: {
-        bronze: 7,
-        silver: 10,
-        gold: 15,
+        bronze: 604800000, // 1000*60*60*24*7 (7 days)
+        silver: 864000000, // 10 days
+        gold: 1296000000, // 15 days
     },
 
     //count by point

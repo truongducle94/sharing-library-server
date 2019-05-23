@@ -55,6 +55,33 @@ function checkTimeBorrow(time, user_rank) {
     return penalty
 }
 
+function remainReturnBook(user_id, scheduleTime, days, book_id) {
+    const heading = NOTIFY_CONSTANTS.NOTIFY_HEADING.REMIND
+    const content = NOTIFY_CONSTANTS.NOTIFY_CONTENT.REMIND(days)
+    const subData = {
+        type: NOTIFY_CONSTANTS.NOTIFY_TYPE.REMIND,
+        data: {
+            book_id,
+        }
+    }
+    apis.pushNotifcation(user_id, heading, content, subData, scheduleTime)
+}
+
+function getLimitedTimeBorrow(rank) {
+    switch (rank) {
+        case constants.userRanking.bronze:
+            return constants.borrow_limit.bronze
+
+        case constants.userRanking.silver:
+            return constants.borrow_limit.silver
+
+        case constants.userRanking.gold:
+            return constants.borrow_limit.gold
+
+        default: return
+    }
+}
+
 // req.data should be: {
 //     user_id, user_rank, data
 // }
@@ -278,6 +305,13 @@ exports.confirmRequest = (req, res) => {
                         }
                     }
                     apis.pushNotifcation(updatedRequest.user_id, heading, content, subData)
+
+                    //Đặt lịch nhắc nhỏ
+                    const maxTime = getLimitedTimeBorrow(updatedRequest.user_rank)
+                    const tsSchedule = updatedRequest.updated_at + maxTime - constants.ms_per_day
+                    const scheduleTime = new Date(tsSchedule)
+                    const { book_id } = updatedRequest.data
+                    remainReturnBook(updatedRequest.user_id, scheduleTime, 1, book_id)
                     return
                 })
             }
@@ -319,6 +353,21 @@ exports.confirmRequest = (req, res) => {
                             }
                         }
                         apis.pushNotifcation(updatedRequest.user_id, heading, content, subData)
+
+                        //add bonus point
+                        Users.findById(updatedRequest.user_id, (err, user) => {
+                            user.point = user.point + constants.bonus_point.per_book
+                            user.save(err => {
+                                //push notify.....
+                                const heading = NOTIFY_CONSTANTS.NOTIFY_HEADING.POINT
+                                const content = NOTIFY_CONSTANTS.NOTIFY_CONTENT.POINT_BONUS(constants.bonus_point.per_book)
+                                const subData = {
+                                    type: NOTIFY_CONSTANTS.NOTIFY_TYPE.POINT,
+                                }
+                                apis.pushNotifcation(user._id, heading, content, subData)
+                            })
+                        })
+
                         return
                     })
                 })
@@ -484,5 +533,39 @@ exports.getRequestById = (req, res) => {
             message: "Get request success",
             data: request
         });
+    })
+}
+
+exports.cancelRequest = (req, res) => {
+    const { request_id } = req.params
+    const user = req.decode.user
+    Requests.findById(request_id, (err, request) => {
+        if (err) {
+            res.json({
+                ok: constants.requestResult.failure,
+                message: 'Request not found',
+            });
+            return
+        }
+        if (request.user_id != user._id) {
+            res.status(400).json({
+                ok: constants.requestResult.failure,
+                message: 'Người dùng không hợp lệ'
+            })
+            return
+        }
+        Requests.deleteOne({ _id: request_id }, (err) => {
+            if (err) {
+                res.json({
+                    ok: constants.requestResult.failure,
+                    message: 'Request not found',
+                });
+                return
+            }
+            res.json({
+                ok: constants.requestResult.success,
+                message: "Yêu cầu đã được hủy bỏ",
+            });
+        })
     })
 }

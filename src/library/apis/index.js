@@ -11,7 +11,7 @@ var instance = axios.create({
       }
 })
 
-exports.pushNotifcation = (user_id, title, contents, subData) => {
+exports.pushNotifcation = (user_id, title, contents, subData, scheduleTime) => {
     let notificationData = {
         app_id: config.ONE_SIGNAL_APP_ID,
         headings: { "en": `${title}` },
@@ -22,6 +22,10 @@ exports.pushNotifcation = (user_id, title, contents, subData) => {
         ],
         data: subData,
     }
+
+    if (!!scheduleTime) {
+        Object.assign(notificationData, {send_after: scheduleTime})
+    } 
 
     return instance.post('', notificationData)
     .then(res => {
@@ -44,22 +48,6 @@ exports.pushNotifcation = (user_id, title, contents, subData) => {
 //             ...data
 //         },
 //         headers: headers
-//     }).then(response => {
-//         return response.data
-//     }).catch(error => {
-//         return error;
-//     })
-// }
-
-// function post(url, data, isAuth) {
-//     let headers = null
-//     if (isAuth) {
-//         headers = {
-//             Authorization: constants.PREFIX_TOKEN + Database.getUserToken()
-//         }
-//     }
-//     return instance.post(url, data, {
-//         headers
 //     }).then(response => {
 //         return response.data
 //     }).catch(error => {

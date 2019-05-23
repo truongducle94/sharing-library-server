@@ -35,7 +35,8 @@ router.route('/requests')
 
 router.route('/requests/:request_id')
     .get(authMiddleware.verifyJwt, requestController.getRequestById)
-
+    .delete(authMiddleware.verifyJwt, requestController.cancelRequest)
+    
 // Yeu cau muon sach
 router.route('/request_borrow')
     .post(authMiddleware.verifyJwt, requestController.createRequestBorrow)
